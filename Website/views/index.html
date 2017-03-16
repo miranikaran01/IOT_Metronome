@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css">
+  </head>
+
+  <body>
+
+    <div class="container" style="padding-top: 50px;">
+      <div class="jumbotron text-center">
+
+        <h1>BPM: <span id="bpm_text">0</span></h1>
+
+        <div class="row" style="padding: 10px;">
+          <button id="get_bpm" type="button" class="btn btn-primary">GET</button>
+        </div>
+
+        <div class="row" style="padding: 10px;">
+          <div class="input-group" style="width: 200px; margin: auto;">
+            <input id="put-input" type="text" class="form-control">
+            <div class="input-group-btn">
+              <button id="put-btn" type="button" class="btn btn-default">PUT</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="well text-left" style="margin-top: 30px;">
+          <h4>Statistics</h4>
+          <div class="row center-block" style="padding: 10px; padding-bottom: 20px;">
+            <h5>Minimum BPM: <span id="min_text">0</span></h5>
+              <div class="row center-block">
+                <button id="get_min" type="button" class="btn btn-get-min">GET</button>
+              </div>
+            <h5>Maximum BPM: <span id="max_text">0</span></h5>
+              <div class="row center-block">
+                <button id="get_max" type="button" class="btn btn-get-max">GET</button>
+              </div>
+          </div>
+          <div class="row center-block">
+            <button id="reset" type="button" class="btn btn-danger">RESET</button>
+          </div>
+          
+        </div>
+
+      </div>
+    </div>
+
+    <script type="text/javascript" src="js/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="js/socket.io.js"></script>
+    <script type="text/javascript">
+      $(function() {
+        // Create a new WebSocket
+        var socket = io();
+
+        // When the html element with the ID get_bpm is clicked, send a message
+        $('#get_bpm').on('click', function() {
+          // get-bpm does not need to send any parameters
+          socket.emit('get-bpm', {});
+        });
+
+        // When the bpm response is received from the server, render the result
+        socket.on('bpm', function(data) {
+          console.log('bpm', data);
+          // Set the html tag value for the coresponding ID to the data
+          $('#bpm_text').html(data.value);
+        });
+
+        // When the html element with the ID get_min is clicked, send a message
+        $('#get_min').on('click', function() {
+          // get-bpm does not need to send any parameters
+          socket.emit('get-min', {});
+        });
+
+        // When the min response is received from the server, render the result
+        socket.on('get-min', function(data) {
+          console.log('min', data);
+          // Set the html tag value for the coresponding ID to the data
+          $('#min_text').html(data.value);
+        });
+
+
+        // When the html element with the ID get_max is clicked, send a message
+        $('#get_max').on('click', function() {
+          // get-bpm does not need to send any parameters
+          socket.emit('get-max', {});
+        });
+
+        // When the max response is received from the server, render the result
+        socket.on('get-max', function(data) {
+          console.log('max', data);
+          // Set the html tag value for the coresponding ID to the data
+          $('#max_text').html(data.value);
+        });
+
+        $('#reset').on('click', function() {          
+          socket.emit('reset-min-max', {});
+        });
+
+        socket.on('reset', function(data) {
+          console.log("data received: ",data);
+          socket.emit('get-min',{});
+          socket.emit('get-max',{});
+        });
+
+
+        $('#put-btn').on('click', function() {     
+          var input_value = $('#put-input').val();
+          socket.emit('put-value', {data:input_value});
+          console.log("value sent: "+ input_value);
+        });
+
+        socket.on('put', function(data) {
+          console.log("value sent to mbed device connector");
+          socket.emit('get-bpm',{});
+        });
+
+
+        
+      });
+    </script>
+
+  </body>
+
+</html>
+
+  </body>
+</html>
